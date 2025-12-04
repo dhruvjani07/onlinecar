@@ -1,0 +1,378 @@
+{% extends 'vehicles/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - AutoMarket{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h2 class="card-title fw-bold mb-4">
+                        <i class="bi bi-{% if vehicle %}pencil{% else %}plus-circle{% endif %}"></i> 
+                        {{ title }}
+                    </h2>
+
+                    <form method="post" enctype="multipart/form-data" id="vehicleForm">
+                        {% csrf_token %}
+                        
+                        <!-- Info Message -->
+                        <div class="alert alert-info mb-4">
+                            <i class="bi bi-info-circle"></i> <strong>Auto-estimate selling price</strong> - Our system will calculate the best price based on your vehicle details
+                        </div>
+
+                        <!-- Basic Information -->
+                        <h5 class="fw-bold mb-3 text-primary mt-4">Basic Information</h5>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form.title|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                               {{ form.company|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.model|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.year|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Technical Details -->
+                        <h5 class="fw-bold mb-3 text-primary mt-4">Technical Details</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                {{ form.category|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.fuel_type|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.transmission|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.mileage|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.condition|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <h5 class="fw-bold mb-3 text-primary mt-4">Pricing</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.original_price|as_crispy_field }}
+                                <small class="text-muted">What you paid when you bought it</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.price|as_crispy_field }}
+                                <small class="text-muted">Your selling price</small>
+                                <button type="button" class="btn btn-success w-100 mt-2" id="calculatePriceBtn">
+                                    <i class="bi bi-calculator"></i> Calculate Estimated Price
+                                </button>
+                                <div id="priceLoader" class="text-center mt-2" style="display: none;">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    Calculating...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <h5 class="fw-bold mb-3 text-primary mt-4">Description</h5>
+                        <div class="mb-3">
+                            {{ form.description|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.features|as_crispy_field }}
+                        </div>
+
+                        <!-- Location & Contact -->
+                        <h5 class="fw-bold mb-3 text-primary mt-4">Location & Contact</h5>
+                        
+                        <!-- Address Field with Google Autocomplete (No Map) -->
+                        <div class="mb-3">
+                            <label for="id_address" class="form-label">Street Address (Optional)</label>
+                            <input type="text" 
+                                   name="address" 
+                                   class="form-control" 
+                                   id="id_address"
+                                   placeholder="Start typing your address..."
+                                   value="{{ form.address.value|default:'' }}"
+                                   autocomplete="off">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> Powered by Google Places - City will auto-populate
+                            </small>
+                            {% if form.address.errors %}
+                                <div class="text-danger small">{{ form.address.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.city|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.seller_phone|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Images -->
+                        <h5 class="fw-bold mb-3 text-primary mt-4">Images</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Main Image (Required)</label>
+                                {{ form.image1 }}
+                                {% if vehicle.image1 %}
+                                    <img src="{{ vehicle.image1.url }}" class="img-thumbnail mt-2" style="max-width: 200px;">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Image 2 (Optional)</label>
+                                {{ form.image2 }}
+                                {% if vehicle.image2 %}
+                                    <img src="{{ vehicle.image2.url }}" class="img-thumbnail mt-2" style="max-width: 200px;">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Image 3 (Optional)</label>
+                                {{ form.image3 }}
+                                {% if vehicle.image3 %}
+                                    <img src="{{ vehicle.image3.url }}" class="img-thumbnail mt-2" style="max-width: 200px;">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Image 4 (Optional)</label>
+                                {{ form.image4 }}
+                                {% if vehicle.image4 %}
+                                    <img src="{{ vehicle.image4.url }}" class="img-thumbnail mt-2" style="max-width: 200px;">
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% if vehicle %}{% url 'vehicle_detail' vehicle.pk %}{% else %}{% url 'home' %}{% endif %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Google Maps API -->
+<script>
+(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;
+    b=b[c]||(b[c]={});
+    var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{
+        await (a=m.createElement("script"));
+        e.set("libraries",[...r]+"");
+        for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);
+        e.set("callback",c+".maps."+q);
+        a.src=`https://maps.${c}apis.com/maps/api/js?`+e;
+        d[q]=f;
+        a.onerror=()=>h=n(Error(p+" could not load."));
+        a.nonce=m.querySelector("script[nonce]")?.nonce||"";
+        m.head.append(a)
+    }));
+    d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))
+})
+({key: "{{ settings.GOOGLE_MAPS_API_KEY }}", v: "weekly"});
+
+// Initialize Google Places Autocomplete for Seller Address (NO MAP)
+async function initSellerAutocomplete() {
+    try {
+        const { Autocomplete } = await google.maps.importLibrary("places");
+        
+        const addressInput = document.getElementById('id_address');
+        const cityInput = document.getElementById('id_city');
+        
+        if (!addressInput) {
+            console.warn("Address input not found");
+            return;
+        }
+
+        const autocomplete = new Autocomplete(addressInput, {
+            componentRestrictions: { country: "ie" },
+            fields: ["address_components", "formatted_address"],
+            types: ["address"],
+        });
+        
+        autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (!place.address_components) return;
+            
+            let street = "";
+            let city = "";
+            
+            for (const component of place.address_components) {
+                const type = component.types[0];
+                
+                switch (type) {
+                    case "street_number":
+                        street = component.long_name + " ";
+                        break;
+                    case "route":
+                        street += component.long_name;
+                        break;
+                    case "locality":
+                    case "postal_town":
+                        city = component.long_name;
+                        break;
+                }
+            }
+            
+            if (street) addressInput.value = street;
+            if (city && cityInput) cityInput.value = city;
+        });
+        
+        console.log("Google Places Autocomplete initialized!");
+    } catch (error) {
+        console.error("Error initializing Google Places:", error);
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initSellerAutocomplete();
+});
+</script>
+
+<!-- Price Calculator Script -->
+<script>
+document.getElementById('calculatePriceBtn').addEventListener('click', function() {
+    // Get form values
+    const originalPrice = document.getElementById('id_original_price').value;
+    const year = document.getElementById('id_year').value;
+    const category = document.getElementById('id_category').value;
+    const fuelType = document.getElementById('id_fuel_type').value;
+    const transmission = document.getElementById('id_transmission').value;
+    const mileage = document.getElementById('id_mileage').value;
+    const condition = document.getElementById('id_condition').value;
+    
+    // Validate inputs silently
+    if (!originalPrice || !year || !mileage) {
+        // Highlight the empty fields
+        if (!originalPrice) document.getElementById('id_original_price').style.border = '2px solid red';
+        if (!year) document.getElementById('id_year').style.border = '2px solid red';
+        if (!mileage) document.getElementById('id_mileage').style.border = '2px solid red';
+        return;
+    }
+    
+    // Reset borders
+    document.getElementById('id_original_price').style.border = '';
+    document.getElementById('id_year').style.border = '';
+    document.getElementById('id_mileage').style.border = '';
+    
+    // Show loader
+    document.getElementById('priceLoader').style.display = 'block';
+    document.getElementById('calculatePriceBtn').disabled = true;
+    
+    // Build API URL
+    const url = `/api/calculate-price/?original_price=${originalPrice}&year=${year}&category=${category}&fuel_type=${fuelType}&transmission=${transmission}&mileage=${mileage}&condition=${condition}`;
+    
+    // Call API
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Set the estimated price in the price field - NO POPUP!
+                document.getElementById('id_price').value = data.estimated_price.toFixed(2);
+                
+                // Add a visual success indicator (green border)
+                const priceField = document.getElementById('id_price');
+                priceField.style.border = '2px solid #28a745';
+                setTimeout(() => {
+                    priceField.style.border = '';
+                }, 2000);
+            } else {
+                console.error('Error calculating price:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            // Hide loader
+            document.getElementById('priceLoader').style.display = 'none';
+            document.getElementById('calculatePriceBtn').disabled = false;
+        });
+});
+</script>
+
+<!-- Car Data Script -->
+<script>
+// Car data
+const carData = {
+  "BMW": ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "6 Series", "7 Series", "8 Series", "M2", "M3", "M4", "M5", "M8", "X1", "X2", "X3", "X4", "X5", "X6", "X7", "Z4", "i3", "i4", "i8", "iX"],
+  "Mercedes-Benz": ["A-Class", "B-Class", "C-Class", "E-Class", "S-Class", "CLA", "CLS", "GLA", "GLB", "GLC", "GLE", "GLS", "G-Class", "AMG GT", "EQC", "EQS"],
+  "Audi": ["A1", "A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q4 e-tron", "Q5", "Q7", "Q8", "TT", "R8", "e-tron GT"],
+  "Toyota": ["Corolla", "Camry", "RAV4", "Highlander", "Land Cruiser", "Prius", "Yaris", "Avalon", "Supra", "4Runner", "Tacoma", "Tundra", "Sienna", "C-HR", "Fortuner", "Innova"],
+  "Honda": ["Civic", "Accord", "CR-V", "HR-V", "Pilot", "Odyssey", "Fit", "Ridgeline", "Passport", "Insight", "City", "Amaze"],
+  "Ford": ["Fiesta", "Focus", "Fusion", "Mustang", "Escape", "Explorer", "Expedition", "Edge", "Bronco", "F-150", "Ranger", "Maverick", "EcoSport"],
+  "Volkswagen": ["Golf", "Polo", "Passat", "Tiguan", "Touareg", "Arteon", "T-Roc", "T-Cross", "ID.3", "ID.4", "ID.5", "Vento"],
+  "Nissan": ["Micra", "Sentra", "Altima", "Maxima", "Juke", "Qashqai", "X-Trail", "Pathfinder", "Murano", "Armada", "GT-R", "Z", "Leaf", "Kicks", "Magnite"],
+  "Hyundai": ["i10", "i20", "i30", "Elantra", "Sonata", "Accent", "Kona", "Tucson", "Santa Fe", "Palisade", "Ioniq 5", "Ioniq 6", "Creta", "Venue", "Verna"],
+  "Kia": ["Picanto", "Rio", "Ceed", "Forte", "K5", "Stinger", "Seltos", "Sportage", "Sorento", "Telluride", "EV6", "Niro", "Sonet", "Carens"],
+  "Mazda": ["Mazda2", "Mazda3", "Mazda6", "CX-3", "CX-30", "CX-5", "CX-9", "CX-60", "MX-5 Miata"],
+  "Chevrolet": ["Spark", "Sonic", "Cruze", "Malibu", "Camaro", "Corvette", "Trax", "Equinox", "Traverse", "Tahoe", "Suburban", "Silverado"],
+  "Tesla": ["Model 3", "Model S", "Model X", "Model Y", "Cybertruck", "Roadster"],
+  "Porsche": ["911", "718 Boxster", "718 Cayman", "Panamera", "Cayenne", "Macan", "Taycan"],
+  "Jaguar": ["XE", "XF", "XJ", "F-Type", "E-Pace", "F-Pace", "I-Pace"],
+  "Land Rover": ["Defender", "Discovery", "Discovery Sport", "Range Rover", "Range Rover Sport", "Range Rover Evoque", "Range Rover Velar"],
+  "Volvo": ["S60", "S90", "V60", "V90", "XC40", "XC60", "XC90", "C40 Recharge"],
+  "Subaru": ["Impreza", "Legacy", "Outback", "Forester", "Crosstrek", "Ascent", "WRX", "BRZ"],
+  "Lexus": ["IS", "ES", "GS", "LS", "RC", "LC", "UX", "NX", "RX", "GX", "LX"],
+  "Jeep": ["Renegade", "Compass", "Cherokee", "Grand Cherokee", "Wrangler", "Gladiator", "Wagoneer", "Grand Wagoneer"],
+  "Tata": ["Nexon", "Harrier", "Safari", "Punch", "Altroz", "Tigor", "Tiago", "Nexon EV", "Tiago EV", "Hexa", "Aria", "Indica", "Indigo"],
+  "Mahindra": ["XUV700", "XUV500", "XUV300", "Scorpio", "Scorpio-N", "Thar", "Bolero", "KUV100", "Marazzo", "TUV300", "e2o", "eVerito", "XUV400"]
+};
+
+// Populate companies on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const companySelect = document.getElementById('id_company');
+    const modelSelect = document.getElementById('id_model');
+    
+    // Clear and add default option
+    companySelect.innerHTML = '<option value="">Select Company...</option>';
+    modelSelect.innerHTML = '<option value="">Select Company First...</option>';
+    
+    // Add all companies to dropdown
+    Object.keys(carData).sort().forEach(company => {
+        const option = document.createElement('option');
+        option.value = company;
+        option.textContent = company;
+        companySelect.appendChild(option);
+    });
+    
+    // When company changes, update models
+    companySelect.addEventListener('change', function() {
+        const selectedCompany = this.value;
+        modelSelect.innerHTML = '<option value="">Select Model...</option>';
+        
+        if (selectedCompany && carData[selectedCompany]) {
+            carData[selectedCompany].forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                modelSelect.appendChild(option);
+            });
+            modelSelect.disabled = false;
+        } else {
+            modelSelect.disabled = true;
+        }
+    });
+});
+</script>
+{% endblock %}

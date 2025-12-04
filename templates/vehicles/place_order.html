@@ -1,0 +1,248 @@
+{% extends 'vehicles/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Buy Online - {{ vehicle.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h2 class="card-title fw-bold mb-4">
+                        <i class="bi bi-cart-check"></i> Complete Your Purchase
+                    </h2>
+                    
+                    <!-- INSTANT SALE NOTICE -->
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightning-fill"></i>
+                        <strong>Instant Sale!</strong> This vehicle will be marked as SOLD immediately after you place your order.
+                    </div>
+                    
+                    <!-- Vehicle Info -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    {% if vehicle.image1 %}
+                                        <img src="{{ vehicle.image1.url }}" class="img-fluid rounded" alt="{{ vehicle.title }}">
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>{{ vehicle.title }}</h5>
+                                    <p class="text-muted mb-2">{{ vehicle.company }} {{ vehicle.model }} • {{ vehicle.year }}</p>
+                                    <h4 class="text-primary fw-bold">€{{ vehicle.price|floatformat:0 }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <h5 class="fw-bold mb-3 text-primary">Your Information</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="id_buyer_full_name" class="form-label">Full Name *</label>
+                                {{ form.buyer_full_name }}
+                                {% if form.buyer_full_name.errors %}
+                                    <div class="text-danger small">{{ form.buyer_full_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_buyer_email" class="form-label">Email Address *</label>
+                                {{ form.buyer_email }}
+                                {% if form.buyer_email.errors %}
+                                    <div class="text-danger small">{{ form.buyer_email.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_buyer_phone" class="form-label">Phone Number *</label>
+                                {{ form.buyer_phone }}
+                                {% if form.buyer_phone.errors %}
+                                    <div class="text-danger small">{{ form.buyer_phone.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <h5 class="fw-bold mb-3 text-primary mt-4">Delivery Address</h5>
+                        
+                        <!-- Street Address with Google Autocomplete (No Map) -->
+                        <div class="mb-3">
+                            <label for="id_delivery_address" class="form-label">Street Address *</label>
+                            <textarea name="delivery_address" 
+                                      class="form-control" 
+                                      id="id_delivery_address"
+                                      rows="3"
+                                      placeholder="Start typing your address..."
+                                      autocomplete="off"
+                                      required>{{ form.delivery_address.value|default:'' }}</textarea>
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> Powered by Google Maps
+                            </small>
+                            {% if form.delivery_address.errors %}
+                                <div class="text-danger small">{{ form.delivery_address.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_delivery_city" class="form-label">City *</label>
+                                {{ form.delivery_city }}
+                                {% if form.delivery_city.errors %}
+                                    <div class="text-danger small">{{ form.delivery_city.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_delivery_postal_code" class="form-label">Postal Code *</label>
+                                {{ form.delivery_postal_code }}
+                                {% if form.delivery_postal_code.errors %}
+                                    <div class="text-danger small">{{ form.delivery_postal_code.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <h5 class="fw-bold mb-3 text-primary mt-4">Payment Method</h5>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-cash-coin"></i>
+                            <strong>Payment Method:</strong> Cash on Delivery
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_notes" class="form-label">Additional Notes (Optional)</label>
+                            {{ form.notes }}
+                            <small class="text-muted">Any special requests or instructions for the seller</small>
+                        </div>
+                        
+                        <!-- Order Summary -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h6 class="fw-bold">Order Summary</h6>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Vehicle Price:</span>
+                                    <span>€{{ vehicle.price|floatformat:0 }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Delivery:</span>
+                                    <span class="text-success">To be arranged</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total:</strong>
+                                    <strong class="text-primary">€{{ vehicle.price|floatformat:0 }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            <strong>Important:</strong> By placing this order, the vehicle will be marked as SOLD immediately. The seller will contact you to arrange delivery details.
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Confirm Purchase
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Google Maps API Loader
+(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;
+    b=b[c]||(b[c]={});
+    var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{
+        await (a=m.createElement("script"));
+        e.set("libraries",[...r]+"");
+        for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);
+        e.set("callback",c+".maps."+q);
+        a.src=`https://maps.${c}apis.com/maps/api/js?`+e;
+        d[q]=f;
+        a.onerror=()=>h=n(Error(p+" could not load."));
+        a.nonce=m.querySelector("script[nonce]")?.nonce||"";
+        m.head.append(a)
+    }));
+    d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))
+})
+({key: "{{ settings.GOOGLE_MAPS_API_KEY }}", v: "weekly"});
+
+// Initialize Google Places Autocomplete for Buyer (NO MAP)
+async function initBuyerAutocomplete() {
+    try {
+        const { Autocomplete } = await google.maps.importLibrary("places");
+        
+        const addressInput = document.getElementById('id_delivery_address');
+        const cityInput = document.getElementById('id_delivery_city');
+        const postalInput = document.getElementById('id_delivery_postal_code');
+        
+        if (!addressInput) {
+            console.warn("Address input not found");
+            return;
+        }
+
+        const autocomplete = new Autocomplete(addressInput, {
+            componentRestrictions: { country: "ie" },
+            fields: ["address_components", "formatted_address"],
+            types: ["address"],
+        });
+        
+        autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (!place.address_components) return;
+            
+            let street = "";
+            let city = "";
+            let postal = "";
+            
+            for (const component of place.address_components) {
+                const type = component.types[0];
+                
+                switch (type) {
+                    case "street_number":
+                        street = component.long_name + " ";
+                        break;
+                    case "route":
+                        street += component.long_name;
+                        break;
+                    case "locality":
+                    case "postal_town":
+                        city = component.long_name;
+                        break;
+                    case "postal_code":
+                        postal = component.long_name;
+                        break;
+                }
+            }
+            
+            if (street) addressInput.value = street;
+            if (city && cityInput) cityInput.value = city;
+            if (postal && postalInput) postalInput.value = postal;
+        });
+        
+        console.log("Google Places Autocomplete initialized!");
+    } catch (error) {
+        console.error("Error initializing Google Places:", error);
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initBuyerAutocomplete();
+});
+</script>
+{% endblock %}

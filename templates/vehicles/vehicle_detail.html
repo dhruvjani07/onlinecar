@@ -1,0 +1,205 @@
+{% extends 'vehicles/base.html' %}
+
+{% block title %}{{ vehicle.title }} - AutoMarket{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'vehicle_list' %}">Vehicles</a></li>
+            <li class="breadcrumb-item active">{{ vehicle.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Left Column - Images & Description -->
+        <div class="col-lg-8 mb-4">
+            <!-- Main Image -->
+            <div class="card mb-4">
+                <img src="{{ vehicle.image1.url }}" class="card-img-top" style="max-height: 500px; object-fit: cover;" alt="{{ vehicle.title }}">
+                {% if vehicle.is_sold %}
+                <div class="position-absolute top-50 start-50 translate-middle">
+                    <span class="badge bg-danger" style="font-size: 3rem; padding: 20px 40px; opacity: 0.9;">
+                        SOLD OUT
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Additional Images -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% if vehicle.image2 %}
+                        <div class="col-4">
+                            <img src="{{ vehicle.image2.url }}" class="img-fluid rounded" style="height: 150px; width: 100%; object-fit: cover;">
+                        </div>
+                        {% endif %}
+                        {% if vehicle.image3 %}
+                        <div class="col-4">
+                            <img src="{{ vehicle.image3.url }}" class="img-fluid rounded" style="height: 150px; width: 100%; object-fit: cover;">
+                        </div>
+                        {% endif %}
+                        {% if vehicle.image4 %}
+                        <div class="col-4">
+                            <img src="{{ vehicle.image4.url }}" class="img-fluid rounded" style="height: 150px; width: 100%; object-fit: cover;">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Description</h4>
+                    <p class="text-justify">{{ vehicle.description }}</p>
+                    
+                    {% if vehicle.features %}
+                    <h5 class="fw-bold mt-4 mb-3">Features</h5>
+                    <ul>
+                        {% for feature in vehicle.features.splitlines %}
+                            <li>{{ feature }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Related Vehicles -->
+            {% if similar_vehicles %}
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Similar Vehicles</h4>
+                    <div class="row">
+                        {% for rel in similar_vehicles %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <img src="{{ rel.image1.url }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ rel.company }} {{ rel.model }}</h6>
+                                    <p class="text-primary fw-bold">€{{ rel.price|floatformat:0 }}</p>
+                                    <a href="{% url 'vehicle_detail' rel.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column - Details & Actions -->
+        <div class="col-lg-4">
+            <!-- Price & Title -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h3 class="fw-bold">{{ vehicle.title }}</h3>
+                    <h2 class="price-tag">€{{ vehicle.price|floatformat:0 }}</h2>
+                    
+                    {% if vehicle.is_sold %}
+                        <span class="badge bg-danger fs-5">SOLD OUT</span>
+                    {% else %}
+                        <span class="badge bg-success">Available</span>
+                    {% endif %}
+                    
+                    {% if vehicle.is_featured %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-star-fill"></i> Featured
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Specifications -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Specifications</h5>
+                    <table class="table table-sm">
+                        <tr>
+                            <td><i class="bi bi-calendar"></i> Year</td>
+                            <td><strong>{{ vehicle.year }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-speedometer"></i> Mileage</td>
+                            <td><strong>{{ vehicle.mileage|floatformat:0 }} km</strong></td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-fuel-pump"></i> Fuel</td>
+                            <td><strong>{{ vehicle.get_fuel_type_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-gear"></i> Transmission</td>
+                            <td><strong>{{ vehicle.get_transmission_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-tag"></i> Category</td>
+                            <td><strong>{{ vehicle.get_category_display }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+           <!-- Action Buttons -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    {% if is_owner %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> This is your listing
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'vehicle_update' vehicle.pk %}" class="btn btn-primary">
+                                <i class="bi bi-pencil"></i> Edit Listing
+                            </a>
+                            <a href="{% url 'vehicle_delete' vehicle.pk %}" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete Listing
+                            </a>
+                        </div>
+                    {% elif vehicle.is_sold %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-x-circle-fill"></i> <strong>This vehicle has been SOLD</strong>
+                            <p class="mb-0 mt-2 small">This car is no longer available for purchase.</p>
+                        </div>
+                    {% else %}
+                        <!-- Buy Online -->
+                        <div class="d-grid gap-2 mb-3">
+                            <a href="{% url 'place_order' vehicle.pk %}" class="btn btn-success btn-lg">
+                                <i class="bi bi-cart-check"></i> Buy This Car
+                            </a>
+                        </div>
+                        
+                        <hr class="my-3">
+                        
+                        <!-- Payment Options Info -->
+                        <div class="small text-muted">
+                            <p class="mb-2"><strong>Payment Options:</strong></p>
+                            <ul class="mb-0">
+                                <li>💵 Cash on Delivery</li>
+                            </ul>
+                        </div>
+                        
+                        {% if has_order %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle"></i> You have ordered this vehicle
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Seller Info -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Seller Information</h5>
+                    <p><i class="bi bi-person"></i> <strong>{{ vehicle.seller.username }}</strong></p>
+                    <p><i class="bi bi-telephone"></i> {{ vehicle.seller_phone }}</p>
+                    <p><i class="bi bi-geo-alt"></i> {{ vehicle.city }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

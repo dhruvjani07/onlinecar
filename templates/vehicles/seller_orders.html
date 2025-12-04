@@ -1,0 +1,113 @@
+{% extends 'vehicles/base.html' %}
+
+{% block title %}Seller Orders - Online Car Market{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="fw-bold mb-4">
+        <i class="bi bi-shop"></i> Seller Orders
+    </h2>
+    
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> 
+        All orders are automatically confirmed when buyers place them. The vehicle is marked as SOLD immediately.
+    </div>
+
+    {% if orders %}
+        <div class="row">
+            {% for order in orders %}
+            <div class="col-12 mb-4">
+                <div class="card {% if order.status == 'confirmed' %}border-success{% else %}border-danger{% endif %}">
+                    <div class="card-header {% if order.status == 'confirmed' %}bg-success text-white{% else %}bg-danger text-white{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Order #{{ order.id }}</h5>
+                            {% if order.status == 'confirmed' %}
+                                <span class="badge bg-light text-success">
+                                    <i class="bi bi-check-circle-fill"></i> SOLD
+                                </span>
+                            {% else %}
+                                <span class="badge bg-light text-danger">
+                                    <i class="bi bi-x-circle-fill"></i> Cancelled
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                {% if order.vehicle.image1 %}
+                                    <img src="{{ order.vehicle.image1.url }}" class="img-fluid rounded" alt="{{ order.vehicle.title }}">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-9">
+                                <h5 class="fw-bold">{{ order.vehicle.title }}</h5>
+                                <p class="text-muted mb-2">{{ order.vehicle.company }} {{ order.vehicle.model }} • {{ order.vehicle.year }}</p>
+                                <h4 class="text-primary fw-bold mb-3">€{{ order.total_amount|floatformat:0 }}</h4>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold">Buyer Information:</h6>
+                                        <p class="mb-1"><i class="bi bi-person-fill"></i> <strong>{{ order.buyer_full_name }}</strong></p>
+                                        <p class="mb-1"><i class="bi bi-envelope"></i> {{ order.buyer_email }}</p>
+                                        <p class="mb-1"><i class="bi bi-telephone-fill"></i> <strong>{{ order.buyer_phone }}</strong></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold">Delivery Address:</h6>
+                                        <p class="mb-1">{{ order.delivery_address }}</p>
+                                        <p class="mb-1">{{ order.delivery_city }}, {{ order.delivery_postal_code }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <p class="mb-1"><strong>Payment Method:</strong> Cash on Delivery</p>
+                                    <p class="mb-1"><strong>Order Date:</strong> {{ order.created_at|date:"M d, Y - H:i" }}</p>
+                                    {% if order.notes %}
+                                        <div class="alert alert-warning mt-2">
+                                            <strong><i class="bi bi-sticky"></i> Buyer Notes:</strong><br>
+                                            {{ order.notes }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if order.status == 'confirmed' %}
+                                    <div class="alert alert-success mt-3">
+                                        <i class="bi bi-check-circle"></i> 
+                                        <strong>Vehicle SOLD!</strong> Please contact the buyer at <strong>{{ order.buyer_phone }}</strong> to arrange delivery.
+                                    </div>
+                                    
+                                    <!-- Optional: Cancel order button -->
+                                    <div class="mt-3">
+                                        <form method="post" action="{% url 'reject_order' order.id %}" class="d-inline" 
+                                              onsubmit="return confirm('Are you sure you want to cancel this order? The vehicle will be marked as available again.');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="bi bi-x-circle"></i> Cancel Order (Make Vehicle Available Again)
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-danger mt-3">
+                                        <i class="bi bi-x-circle"></i> This order has been cancelled. The vehicle is available for sale again.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center p-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                <h4 class="mt-3">No orders yet</h4>
+                <p class="text-muted mb-4">Orders for your vehicles will appear here</p>
+                <a href="{% url 'my_listings' %}" class="btn btn-primary">
+                    <i class="bi bi-card-list"></i> View My Listings
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

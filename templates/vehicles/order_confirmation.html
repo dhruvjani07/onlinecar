@@ -1,0 +1,65 @@
+{% extends 'vehicles/base.html' %}
+
+{% block title %}Order Confirmation{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h2 class="fw-bold mb-3">Order Placed Successfully!</h2>
+                    <p class="lead mb-4">Order ID: <strong>#{{ order.id }}</strong></p>
+                    
+                    <div class="card bg-light mb-4">
+                        <div class="card-body text-start">
+                            <h5 class="fw-bold mb-3">Order Details</h5>
+                            
+                            <div class="row mb-2">
+                                <div class="col-md-4"><strong>Vehicle:</strong></div>
+                                <div class="col-md-8">{{ order.vehicle.title }}</div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-md-4"><strong>Total Amount:</strong></div>
+                                <div class="col-md-8">€{{ order.total_amount|floatformat:0 }}</div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-md-4"><strong>Payment Method:</strong></div>
+                                <div class="col-md-8">{{ order.get_payment_method_display }}</div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-md-4"><strong>Delivery Address:</strong></div>
+                                <div class="col-md-8">
+                                    {{ order.delivery_address }}<br>
+                                    {{ order.delivery_city }}, {{ order.delivery_postal_code }}<br>
+                                    Phone: {{ order.delivery_phone }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info text-start">
+                        <i class="bi bi-info-circle"></i> The seller will contact you at <strong>{{ order.delivery_phone }}</strong> within 24 hours to confirm delivery details.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'my_orders' %}" class="btn btn-primary">
+                            <i class="bi bi-bag-check"></i> View My Orders
+                        </a>
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-house"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

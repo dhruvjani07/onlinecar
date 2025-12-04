@@ -1,0 +1,78 @@
+{% extends 'vehicles/base.html' %}
+
+{% block title %}My Listings - AutoMarket{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">
+            <i class="bi bi-card-list"></i> My Listings
+        </h2>
+        <a href="{% url 'vehicle_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add New Listing
+        </a>
+    </div>
+
+    {% if vehicles %}
+        <div class="row">
+            {% for vehicle in vehicles %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <img src="{{ vehicle.image1.url }}" class="card-img-top" alt="{{ vehicle.title }}">
+                    
+                    <div class="card-body">
+                        {% if vehicle.is_featured %}
+                            <span class="badge bg-warning text-dark mb-2">
+                                <i class="bi bi-star-fill"></i> Featured
+                            </span>
+                        {% endif %}
+                        
+                        {% if vehicle.is_sold %}
+                            <span class="badge bg-danger mb-2">SOLD</span>
+                        {% else %}
+                            <span class="badge bg-success mb-2">Available</span>
+                        {% endif %}
+                        
+                        <h5 class="card-title fw-bold">{{ vehicle.title }}</h5>
+                        
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-calendar"></i> {{ vehicle.year }} | 
+                            <i class="bi bi-speedometer"></i>{{ vehicle.mileage|floatformat:0 }} km
+                        </p>
+                        
+                        <p class="price-tag mb-3">€{{ vehicle.price|floatformat:0 }}</p>
+                        
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-clock"></i> Listed {{ vehicle.created_at|timesince }} ago
+                        </p>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                            <a href="{% url 'vehicle_update' vehicle.pk %}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{% url 'vehicle_delete' vehicle.pk %}" class="btn btn-danger btn-sm">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center p-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                <h4 class="mt-3">No listings yet</h4>
+                <p class="text-muted mb-4">Create your first vehicle listing to get started</p>
+                <a href="{% url 'vehicle_create' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle"></i> Create Your First Listing
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

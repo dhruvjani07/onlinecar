@@ -1,0 +1,133 @@
+{% extends 'vehicles/base.html' %}
+
+{% block title %}Search Vehicles - AutoMarket{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="fw-bold mb-4">
+        <i class="bi bi-search"></i> Search Vehicles
+    </h2>
+
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <form method="get">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Search</label>
+                        {{ form.query }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Category</label>
+                        {{ form.category }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Min Price (€)</label>
+                        {{ form.min_price }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Max Price (€)</label>
+                        {{ form.max_price }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Count -->
+    {% if results_count %}
+        <p class="text-muted mb-3">
+            <i class="bi bi-check-circle"></i> Found {{ results_count }} vehicle{{ results_count|pluralize }}
+        </p>
+    {% endif %}
+
+    <!-- Results -->
+    {% if page_obj %}
+        <div class="row">
+            {% for vehicle in page_obj %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <img src="{{ vehicle.image1.url }}" class="card-img-top" alt="{{ vehicle.title }}">
+                    
+                    <div class="card-body">
+                        {% if vehicle.is_featured %}
+                            <span class="badge bg-warning text-dark mb-2">
+                                <i class="bi bi-star-fill"></i> Featured
+                            </span>
+                        {% endif %}
+                        <span class="badge bg-primary mb-2">{{ vehicle.get_category_display }}</span>
+                        
+                        <h5 class="card-title fw-bold">{{ vehicle.title }}</h5>
+                        
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-calendar"></i> {{ vehicle.year }} | 
+                            <i class="bi bi-speedometer"></i> {{ formatter.format_mileage(vehicle.mileage) }}
+                        </p>
+                        
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-fuel-pump"></i> {{ vehicle.get_fuel_type_display }} | 
+                            <i class="bi bi-gear"></i> {{ vehicle.get_transmission_display }}
+                        </p>
+                        
+                        <p class="price-tag mb-3">{{ formatter.format_price(vehicle.price) }}</p>
+                        
+                        <p class="text-muted small">
+                            <i class="bi bi-geo-alt"></i> {{ vehicle.city }}
+                        </p>
+                        
+                        <div class="d-grid">
+                            <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-primary">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Search results pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{{ request.GET.urlencode }}&page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.paginator.num_pages }}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="alert alert-info text-center">
+            <h4><i class="bi bi-info-circle"></i> No vehicles found</h4>
+            <p>Try adjusting your search criteria</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
