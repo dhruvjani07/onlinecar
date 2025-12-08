@@ -112,7 +112,7 @@ class PriceEstimator:
     # Category multipliers
     CATEGORY_MULTIPLIERS = {
         'sedan': 1.0,
-        'suv': 1.15,      # SUVs hold value better
+        'suv': 1.15,     
         'hatchback': 0.95,
         'truck': 1.10,
         'coupe': 0.90,
@@ -123,14 +123,14 @@ class PriceEstimator:
     FUEL_MULTIPLIERS = {
         'petrol': 1.0,
         'diesel': 1.05,
-        'electric': 1.20,   # Electric cars hold value better
+        'electric': 1.20,   
         'hybrid': 1.10,
     }
     
     # Transmission multipliers
     TRANSMISSION_MULTIPLIERS = {
         'manual': 0.95,
-        'automatic': 1.05,  # Automatic preferred
+        'automatic': 1.05, 
     }
     
     # Condition multipliers
@@ -225,9 +225,9 @@ class PriceEstimator:
         condition_factor = cls.CONDITION_MULTIPLIERS.get(condition, 1.0)
         
         # Calculate mileage impact
-        mileage_units = mileage / 10000  # per 10,000 km
+        mileage_units = mileage / 10000  
         mileage_factor = 1 - (mileage_units * cls.MILEAGE_DEPRECIATION)
-        mileage_factor = max(mileage_factor, 0.5)  # Minimum 50% of value
+        mileage_factor = max(mileage_factor, 0.5)  
         
         # Calculate final estimated price
         estimated_price = base_value * category_factor * fuel_factor * transmission_factor * condition_factor * mileage_factor
@@ -257,8 +257,8 @@ class PriceEstimator:
         Returns:
             dict: Price range with min, estimated, and max values
         """
-        min_price = estimated_price * 0.90  # 10% below estimate
-        max_price = estimated_price * 1.10  # 10% above estimate
+        min_price = estimated_price * 0.90 
+        max_price = estimated_price * 1.10 
         
         return {
             'min_price': round(min_price, 2),

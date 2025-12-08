@@ -3,16 +3,12 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECRET_KEY - Generated secure key
 SECRET_KEY = 'om=!r)ws9mnzcs=+yxqzu9jca*jh6fus)an6rht9o6f#23)zu@'
 
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# -------------------------------
-# Applications
-# -------------------------------
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -32,9 +28,6 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
-# -------------------------------
-# Middleware
-# -------------------------------
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -68,11 +61,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'webcar.wsgi.application'
 
-# -------------------------------
 # Database (AWS RDS PostgreSQL)
-# Sensitive: DB_PASSWORD from environment
-# -------------------------------
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -87,10 +76,6 @@ DATABASES = {
     }
 }
 
-# -------------------------------
-# Password Validation
-# -------------------------------
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -98,35 +83,23 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# -------------------------------
-# Localization
-# -------------------------------
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# -------------------------------
 # Static Files
-# -------------------------------
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# -------------------------------
 # MEDIA — AWS S3
-# Sensitive: AWS credentials from environment
-# -------------------------------
-
 USE_S3_FOR_MEDIA = True
 
 if USE_S3_FOR_MEDIA:
-    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
-    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
-    AWS_STORAGE_BUCKET_NAME = 'webcarmedia'
-    AWS_S3_REGION_NAME = 'eu-west-1'
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "webcarmedia")
+    AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-west-1")
 
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
@@ -140,29 +113,17 @@ else:
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
 
-# -------------------------------
-# Crispy Forms
-# -------------------------------
+
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# -------------------------------
-# Auth Redirects
-# -------------------------------
 
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'home'
 
-# -------------------------------
 # Google Maps
-# -------------------------------
-
 GOOGLE_MAPS_API_KEY = 'AIzaSyAdeAVx_1FG92yL1yoP9LWN8QKyaUI60wE'
-
-# -------------------------------
-# Default Primary Key
-# -------------------------------
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
